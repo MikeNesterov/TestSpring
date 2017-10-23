@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-3.2.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:client.properties</value>
+            </list>
+        </property>
+        <property name="ignoreResourceNotFound" value="true" />
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+    </bean>
+
+    <bean id="client" class="Client">
+        <constructor-arg index="0" value="${id}" />
+        <constructor-arg value="${name}" />
+        <property name="greeting" value="${greeting"/>
+    </bean>
+
+    <bean id="app" class="App">
+        <constructor-arg ref="client"/>
+        <constructor-arg value="#{ T(event.Event).isDay(8,17) ?
+            cacheFileEventLogger : consoleEventLogger }" />
+        <constructor-arg ref="loggerMap"/>
+    </bean>
+
+    <util:map id="loggerMap">
+        <entry key="INFO" value-ref="consoleEventLogger"/>
+        <entry key="ERROR" value-ref="combinedEventLogger"/>
+    </util:map>
+
+    <bean id="event" class="event.Event" scope="prototype">
+        <constructor-arg value="#{new java.util.Date()}"/>
+        <constructor-arg value="#{T(java.text.DateFormat).getDateTimeInstance()}" />
+    </bean>
+
+</beans>
